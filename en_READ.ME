@@ -1,0 +1,97 @@
+CREATING A PORT SCANNER IN C
+
+The code below demonstrates how to create a C program that scans ports on a target host using TCP sockets.
+
+⚠️ For educational purposes only • Developed by M!ss s3c
+
+1. Create the program file
+
+In the terminal, type:
+
+nano portscan.c
+
+
+Add the following code:
+
+#include <stdio.h>
+#include <sys/socket.h>
+#include <netdb.h>
+#include <arpa/inet.h>
+#include <unistd.h>
+
+int main(int argc, char *argv[]) {
+
+    if(argc < 2){
+        printf("Usage: ./portscan <target-IP>\n");
+        return 0;
+    }
+
+    int mySocket; 
+    int connectResult;
+    int port;
+    int start = 0;
+    int end = 65535;
+    char *target = argv[1];
+
+    struct sockaddr_in hostAddr;
+
+    for(port = start; port <= end; port++) {
+
+        mySocket = socket(AF_INET, SOCK_STREAM, 0);
+        if(mySocket < 0) continue;
+
+        hostAddr.sin_family = AF_INET;
+        hostAddr.sin_port = htons(port);
+        hostAddr.sin_addr.s_addr = inet_addr(target);
+
+        connectResult = connect(mySocket, (struct sockaddr *)&hostAddr, sizeof(hostAddr));
+        if(connectResult == 0){
+            printf("Port %d - status [open]\n", port);
+        }
+
+        close(mySocket);
+    }
+
+    return 0;
+}
+
+2. Compile the program
+
+In the terminal, type:
+
+gcc portscan.c -o portscan
+
+
+gcc → C compiler
+
+-o portscan → name of the generated executable
+
+3. Run the program
+./portscan 192.168.0.1
+
+
+Replace 192.168.0.1 with the target IP you want to scan.
+
+The program will attempt to connect to all ports from 0 to 65535 and display only the open ones.
+
+4. Important notes
+
+Using this type of scanner on unauthorized networks is illegal. Use only in authorized environments or for learning purposes.
+
+To improve performance, you can:
+
+Reduce the port range (e.g., 1 to 1024).
+
+Use threads or forks for parallel scanning.
+
+Always close sockets after use with close().
+
+👉 What you learned here
+
+Creating TCP sockets in C to test ports (socket(), connect()).
+
+Using a for loop for sequential port scanning.
+
+Using htons() and inet_addr() to handle IP addresses and ports.
+
+close() to release system resources.
